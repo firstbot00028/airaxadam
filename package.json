@@ -1,15 +1,20 @@
 {
-  "name": "airaxadam",
+  "name": "airaxadam-multi-pair",
   "version": "1.0.0",
-  "description": "Aira x Adam Project - Ultimate Node.js Bot",
+  "description": "WhatsApp Multi-Device Pairing System via Telegram",
   "main": "index.js",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.5.0",
+    "telegraf": "^4.12.2",
+    "pino": "^8.0.0",
+    "axios": "^1.6.0",
+    "qrcode-terminal": "^0.12.0",
+    "fs-extra": "^11.1.1"
+  },
   "scripts": {
     "start": "node index.js"
   },
-  "dependencies": {
-    "telegraf": "^4.12.2"
-  },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.x"
   }
 }
